@@ -29,7 +29,7 @@ pub use crate::builder::{Builder, EntryWriter};
 pub use crate::entry::{Entry, Unpacked};
 pub use crate::entry_type::EntryType;
 pub use crate::header::GnuExtSparseHeader;
-#[cfg(all(any(unix, windows), not(target_arch = "wasm32")))]
+#[cfg(all(any(unix, windows), not(target_family = "wasm")))]
 pub use crate::header::DETERMINISTIC_TIMESTAMP;
 pub use crate::header::{GnuHeader, GnuSparseHeader, Header, HeaderMode, OldHeader, UstarHeader};
 pub use crate::pax::{PaxExtension, PaxExtensions};

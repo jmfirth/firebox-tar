@@ -1,4 +1,4 @@
-#[cfg(all(unix, not(target_arch = "wasm32")))]
+#[cfg(all(unix, not(target_family = "wasm")))]
 use std::os::unix::prelude::*;
 #[cfg(windows)]
 use std::os::windows::prelude::*;
@@ -20,7 +20,7 @@ use crate::EntryType;
 ///
 /// This value, chosen after careful deliberation, corresponds to _Jul 23, 2006_,
 /// which is the date of the first commit for what would become Rust.
-#[cfg(all(any(unix, windows), not(target_arch = "wasm32")))]
+#[cfg(all(any(unix, windows), not(target_family = "wasm")))]
 pub const DETERMINISTIC_TIMESTAMP: u64 = 1153704088;
 
 pub(crate) const BLOCK_SIZE: u64 = 512;
@@ -762,13 +762,13 @@ impl Header {
         }
     }
 
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(target_family = "wasm")]
     #[allow(unused_variables)]
     fn fill_platform_from(&mut self, meta: &fs::Metadata, mode: HeaderMode) {
         unimplemented!();
     }
 
-    #[cfg(all(unix, not(target_arch = "wasm32")))]
+    #[cfg(all(unix, not(target_family = "wasm")))]
     fn fill_platform_from(&mut self, meta: &fs::Metadata, mode: HeaderMode) {
         match mode {
             HeaderMode::Complete => {
@@ -1634,7 +1634,7 @@ fn copy_path_into_gnu_long(slot: &mut [u8], path: &Path, is_link_name: bool) -> 
     copy_path_into_inner(slot, path, is_link_name, true)
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(target_family = "wasm")]
 fn ends_with_slash(p: &Path) -> bool {
     p.to_string_lossy().ends_with('/')
 }
@@ -1645,12 +1645,12 @@ fn ends_with_slash(p: &Path) -> bool {
     last == Some(b'/' as u16) || last == Some(b'\\' as u16)
 }
 
-#[cfg(all(unix, not(target_arch = "wasm32")))]
+#[cfg(all(unix, not(target_family = "wasm")))]
 fn ends_with_slash(p: &Path) -> bool {
     p.as_os_str().as_bytes().ends_with(b"/")
 }
 
-#[cfg(any(windows, target_arch = "wasm32"))]
+#[cfg(any(windows, target_family = "wasm"))]
 pub fn path2bytes(p: &Path) -> io::Result<Cow<'_, [u8]>> {
     p.as_os_str()
         .to_str()
@@ -1672,7 +1672,7 @@ pub fn path2bytes(p: &Path) -> io::Result<Cow<'_, [u8]>> {
         })
 }
 
-#[cfg(all(unix, not(target_arch = "wasm32")))]
+#[cfg(all(unix, not(target_family = "wasm")))]
 /// On unix this will never fail
 pub fn path2bytes(p: &Path) -> io::Result<Cow<'_, [u8]>> {
     Ok(Cow::Borrowed(p.as_os_str().as_bytes()))
@@ -1701,7 +1701,7 @@ pub fn bytes2path(bytes: Cow<[u8]>) -> io::Result<Cow<Path>> {
     }
 }
 
-#[cfg(all(unix, not(target_arch = "wasm32")))]
+#[cfg(all(unix, not(target_family = "wasm")))]
 /// On unix this operation can never fail.
 pub fn bytes2path(bytes: Cow<[u8]>) -> io::Result<Cow<Path>> {
     use std::ffi::{OsStr, OsString};
@@ -1712,7 +1712,7 @@ pub fn bytes2path(bytes: Cow<[u8]>) -> io::Result<Cow<Path>> {
     })
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(target_family = "wasm")]
 pub fn bytes2path(bytes: Cow<[u8]>) -> io::Result<Cow<Path>> {
     Ok(match bytes {
         Cow::Borrowed(bytes) => {
@@ -1724,7 +1724,7 @@ pub fn bytes2path(bytes: Cow<[u8]>) -> io::Result<Cow<Path>> {
     })
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(target_family = "wasm")]
 fn invalid_utf8<T>(_: T) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, "Invalid utf-8")
 }

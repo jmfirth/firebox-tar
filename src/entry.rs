@@ -593,10 +593,9 @@ impl<'a> EntryFields<'a> {
             }
             return Ok(Unpacked::__Nonexhaustive);
 
-            #[cfg(target_arch = "wasm32")]
-            #[allow(unused_variables)]
-            fn symlink(src: &Path, dst: &Path) -> io::Result<()> {
-                Ok(())
+            #[cfg(all(target_family = "wasm", not(target_vendor = "wasmer")))]
+            fn symlink(_: &Path, _: &Path) -> io::Result<()> {
+                Err(io::ErrorKind::Unsupported.into())
             }
 
             #[cfg(windows)]
@@ -604,7 +603,7 @@ impl<'a> EntryFields<'a> {
                 ::std::os::windows::fs::symlink_file(src, dst)
             }
 
-            #[cfg(all(unix, not(target_arch = "wasm32")))]
+            #[cfg(any(all(unix, not(target_family = "wasm")), target_vendor = "wasmer"))]
             fn symlink(src: &Path, dst: &Path) -> io::Result<()> {
                 ::std::os::unix::fs::symlink(src, dst)
             }
@@ -730,7 +729,7 @@ impl<'a> EntryFields<'a> {
             })
         }
 
-        #[cfg(all(unix, not(target_arch = "wasm32")))]
+        #[cfg(all(unix, not(target_family = "wasm")))]
         fn _set_ownerships(
             dst: &Path,
             f: &Option<&mut std::fs::File>,
@@ -771,7 +770,7 @@ impl<'a> EntryFields<'a> {
         }
 
         // Windows does not support posix numeric ownership IDs
-        #[cfg(any(windows, target_arch = "wasm32"))]
+        #[cfg(any(windows, target_family = "wasm"))]
         fn _set_ownerships(
             _: &Path,
             _: &Option<&mut std::fs::File>,
@@ -801,7 +800,7 @@ impl<'a> EntryFields<'a> {
             })
         }
 
-        #[cfg(all(unix, not(target_arch = "wasm32")))]
+        #[cfg(any(all(unix, not(target_family = "wasm")), target_vendor = "wasmer"))]
         fn _set_perms(
             dst: &Path,
             f: Option<&mut std::fs::File>,
@@ -809,7 +808,7 @@ impl<'a> EntryFields<'a> {
             mask: u32,
             preserve: bool,
         ) -> io::Result<()> {
-            use std::os::unix::prelude::*;
+            use std::os::unix::fs::PermissionsExt;
 
             let mode = if preserve { mode } else { mode & 0o777 };
             let mode = mode & !mask;
@@ -845,19 +844,18 @@ impl<'a> EntryFields<'a> {
             }
         }
 
-        #[cfg(target_arch = "wasm32")]
-        #[allow(unused_variables)]
+        #[cfg(all(target_family = "wasm", not(target_vendor = "wasmer")))]
         fn _set_perms(
-            dst: &Path,
-            f: Option<&mut std::fs::File>,
-            mode: u32,
-            mask: u32,
-            _preserve: bool,
+            _: &Path,
+            _: Option<&mut std::fs::File>,
+            _: u32,
+            _: u32,
+            _: bool,
         ) -> io::Result<()> {
-            Ok(())
+            Err(io::ErrorKind::Unsupported.into())
         }
 
-        #[cfg(all(unix, not(target_arch = "wasm32"), feature = "xattr"))]
+        #[cfg(all(unix, not(target_family = "wasm"), feature = "xattr"))]
         fn set_xattrs(me: &mut EntryFields, dst: &Path) -> io::Result<()> {
             use std::ffi::OsStr;
             use std::os::unix::prelude::*;
@@ -895,7 +893,7 @@ impl<'a> EntryFields<'a> {
         }
         // Windows does not completely support posix xattrs
         // https://en.wikipedia.org/wiki/Extended_file_attributes#Windows_NT
-        #[cfg(any(windows, not(feature = "xattr"), target_arch = "wasm32"))]
+        #[cfg(any(windows, not(feature = "xattr"), target_family = "wasm"))]
         fn set_xattrs(_: &mut EntryFields, _: &Path) -> io::Result<()> {
             Ok(())
         }
