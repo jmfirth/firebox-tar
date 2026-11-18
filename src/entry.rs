@@ -596,7 +596,7 @@ impl<'a> EntryFields<'a> {
             #[cfg(target_arch = "wasm32")]
             #[allow(unused_variables)]
             fn symlink(src: &Path, dst: &Path) -> io::Result<()> {
-                Err(io::Error::new(io::ErrorKind::Other, "Not implemented"))
+                Ok(())
             }
 
             #[cfg(windows)]
@@ -854,7 +854,7 @@ impl<'a> EntryFields<'a> {
             mask: u32,
             _preserve: bool,
         ) -> io::Result<()> {
-            Err(io::Error::new(io::ErrorKind::Other, "Not implemented"))
+            Ok(())
         }
 
         #[cfg(all(unix, not(target_arch = "wasm32"), feature = "xattr"))]

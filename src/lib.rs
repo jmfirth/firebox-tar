@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 //! A library for reading and writing TAR archives
 //!
 //! This library provides utilities necessary to manage [TAR archives][1]
