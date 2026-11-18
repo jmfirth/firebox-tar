@@ -19,6 +19,7 @@
 //     all just super thin wrappers (e.g. easy to codegen).
 
 #![doc(html_root_url = "https://docs.rs/tar/0.4")]
+#![cfg_attr(all(target_os = "wasi", target_vendor = "wasmer"), feature(wasi_ext))]
 #![deny(missing_docs)]
 #![cfg_attr(test, deny(warnings))]
 
